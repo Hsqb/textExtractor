@@ -74,6 +74,7 @@ const inserAllValues = function(chap, result){
 }
 let totalError = 0;
 R.map((chap)=>{
+  let chapName = R.split("/",chap)[2];
   walk (chap, __dirname+"/"+chap, function(err, result){
     if(err) console.error(err);
     inserAllValues(chap, result);
@@ -97,12 +98,12 @@ R.map((chap)=>{
     console.log(chap+":"+R.reduce((acc, val)=>{
         return acc + R.length(val);
     }, 0, uniqValues));
-    var buffer = nexcel.build([{name: chap, data: [["원문","출현수","문장길이","출현수*문장길이"]].concat(newArrays)}]); // Returns a buffer
-    fs.writeFileSync(__dirname + "/"+chap+"_Info.xlsx", buffer, 'utf8')
+    var buffer = nexcel.build([{name: chapName, data: [["원문","출현수","문장길이","출현수*문장길이"]].concat(newArrays)}]); // Returns a buffer
+    fs.writeFileSync(__dirname + "/dest/"+chapName+"_Info.xlsx", buffer, 'utf8')
     ///console.log(chap + " leng : "+R.length(allValues[chap]))
   });
 
-},["noel_s1","noel_s2"]);
+},[process.argv[2]]);
 
 //,"noel_s3","noel_s4","noel_s5","noel_s6",
 /*

@@ -226,7 +226,7 @@ if(isMapMode){
     return acc;
   },[],R.keys(processed));
 	console.log(JSON.stringify(processed, null, 2));
-  let chap = R.split("/",process.argv[2])[1];
+  let chap = R.split("/",process.argv[2])[2];
   var buffer = nexcel.build([{name: chap, data: forExcel}]); // Returns a buffer
-  fs.writeFileSync(__dirname + "/"+chap+"_else_Info.xlsx", buffer, 'utf8')
+  fs.writeFileSync(__dirname + "/dest/"+chap+"_else_Info.xlsx", buffer, 'utf8')
 }
