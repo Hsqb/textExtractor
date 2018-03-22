@@ -70,7 +70,6 @@ const walker = (path, node)=>{
             }
 			return 0
 		}
-
 };
 //console.log(process.argv[2]);
 const worksheet  = nexcel.parse(__dirname+'/tmaps/'+process.argv[2]+'_translated.xlsx');
@@ -85,12 +84,16 @@ Promise.all(promiseArr)
 .then(()=>{
     for(let i in Root){
       let val = Root[i];
+      //console.log("before:"+val);
+      let mapKey = R.replace(/\\\./g,"",val);
+      //console.log("after:"+val);
       let path = R.compose(R.drop(1),R.split("/"))(i)
       let fileName = R.take(1, path);
       let innerPath = R.compose(R.map((item)=>!isNaN(parseInt(item)) ? parseInt(item) : item),R.drop(1))(path)
       //console.log(innerPath)
-      let transed = orgTrnMap[val];
+      let transed = orgTrnMap[mapKey];
       //console.log(innerPath)
+      try{
       if(!R.isNil(transed)){
         //console.log(innerPath+"|"+R.length(transed));
         let paramIndex = R.findIndex(R.equals('parameters'),innerPath);
@@ -164,7 +167,10 @@ Promise.all(promiseArr)
     }else{
         console.log(fileName + ":"+val);
     }
-
+}catch(e){
+    console.error(e);
+    console.log("path : ", innerPath)
+}
 
     }
     //console.log(JSON.stringify(target, null, 2));
