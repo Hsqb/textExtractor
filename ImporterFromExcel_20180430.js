@@ -6,27 +6,7 @@ const Root = {}
 const MsgWhObj = {};
 const tester = /[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[々〆〤]+/u;
 const msgWh = /MessageWidth/;
-// const special1 = /\\\./;
-// const special2 = /\\cl/;
-// const special3 = /\.\\\\\./;
-// const special4 = /　/;
-// const special5 = /\./;
-const regexpArr = [/\\\./g,/\.\\\\\./g,/　/g,/\\\\cl/g, /\\\\\./g,'\\\.',"\cl", '\\\.\\\.']///\./g
-const removeSpecial = x => {
-    if(R.is(String)(x)){
-        //console.log(x)
-        //console.log(R.apply(R.compose,R.map(R.replace(R.__,""),regexpArr ))(x))
-        return R.apply(R.compose,R.map(R.replace(R.__,""),regexpArr ))(x);
-    }
-    else {
-        return "";
-    }
-}
-const getStrByte = function(s,b,i,c){
-    for(b=i=0;c=s.charCodeAt(i++);b+=c>>11?3:c>>7?2:1);
-    return b
-}
-const specialContainer = [];
+
 const objFromKeys = R.curry((fn, keys) =>
   R.zipObj(keys, R.map(fn, keys)));
 const promiseArr = [];
@@ -51,72 +31,27 @@ const getJsonInDataDir = (path)=>{
 };
 
 const getSplitList = (txt)=>{
-    if(process.argv[3] === "eng"){
-       let spaceSplit = R.split(" ", txt);
-       return R.compose(//R.filter((x)=>{return R.length(x) > 0;}),
-                        R.filter((x)=>{
-                                    let a = removeSpecial(x);
-                                    return R.length(x) > 0 && R.length(a) > 0
-                        }),
-                        R.map(R.trim),
-                        R.reduce((acc, word)=>{
-                             if(R.length(acc) === 0){
-                               acc.push("");
-                             }
-                             else if(R.length(acc[acc.length - 1]) > 40){
-                               acc.push("");
-                             }
-
-                            acc[acc.length - 1] = acc[acc.length - 1].concat(word+" ");
-                             return acc;
-                        },[])
-                    )(spaceSplit);
-    }else{
-        let tempTxt = "";
-        let splitArr = [];
-        let isLong = false;
-        if(R.indexOf("\c[0]",txt) > -1){
-            let noChar = R.compose(R.replace(/\\v\[\d+?\]/g,""),R.replace(/\c\[\d+?\]/g,""), R.replace(/\\\./g, ""))(txt);
-            if((getStrByte(noChar) > 69 || R.length(noChar) > 23) && R.indexOf("，",txt) < 0){
-                isLong = true;
-                specialContainer.push({
-                    original : txt,
-                    noSpecial : noChar,
-                    byte : getStrByte(noChar),
-                    length : R.length(noChar),
-                })
-//                console.log(noChar)
-//                console.log(":C[0]PROBLEM:"+getStrByte(noChar)+":"+txt);
-            }
-            if((getStrByte(noChar) > 69 || R.length(noChar) > 23) && R.indexOf("，",txt) > -1){
-                let tempArr = R.split("，", txt);
-                tempArr[0] += "，";
-                splitArr = tempArr;
-            }else if(isLong && R.indexOf("\r\n",txt) < 0){
-                let tempArr = R.splitAt(R.indexOf("\c[0]",txt)+4, txt);
-                //console.log("isLong && R.indexOf(,txt) < 0 :"+JSON.stringify(tempArr))
-                splitArr = tempArr;
-            }else{
-                splitArr = [txt];
-            }
-
-        }else{
-            splitArr = R.splitEvery(24,txt);
-        }
-
-        return R.compose(R.filter((x)=>{
-            let a = removeSpecial(x);
-
-            return R.length(x) > 0 && R.length(a) > 0
-                                }),
-                         R.map(R.trim),
-                         R.reduce((acc, word)=>{
-                              acc.push(word);
-                              return acc;
-                         },[])
-                     )(splitArr);
-    }
-
+   let spaceSplit = R.split(" ", txt);
+   return R.compose(R.filter((x)=>{return R.length(x) > 0;}),
+                    R.map(R.trim),
+                    R.reduce((acc, word)=>{
+                         if(R.length(acc) === 0){
+                           acc.push("");
+                         }
+                         else if(R.length(acc[acc.length - 1]) > 40){
+                           acc.push("");
+                         }
+                         /*if(R.length(word) > 20){
+                             acc[acc.length - 1] = acc[acc.length - 1].concat(R.slice(0,20,word));
+                             acc.push("");
+                             acc[acc.length - 1] = acc[acc.length - 1].concat(R.slice(20,Infinity,word)+" ");
+                         }else{
+                             acc[acc.length - 1] = acc[acc.length - 1].concat(word+" ");
+                         }*/
+                        acc[acc.length - 1] = acc[acc.length - 1].concat(word+" ");
+                         return acc;
+                    },[])
+                )(spaceSplit);
 };
 
 const walker = (path, node)=>{
@@ -197,7 +132,7 @@ Promise.all(promiseArr)
     for(let i in Root){
       let val = Root[i];
       //console.log("before:"+val);
-      let mapKey = val;//R.replace(/\\\./g,"",val);/////val;
+      let mapKey = val;///R.replace(/\\\./g,"",val)//val;
       //console.log("after:"+val);
       let path = R.compose(R.drop(1),R.split("/"))(i)
       let fileName = R.take(1, path);
@@ -269,9 +204,6 @@ Promise.all(promiseArr)
                 return selection;
             }), target[fileName]);
         }
-        else if(targetEvObj.code === 122){
-            target[fileName] = R.set(R.lensPath(pathToList.concat([targetEvIdx, "parameters", 4])), transed, target[fileName]);
-        }
         else if(targetEvObj.code === 402){
             //console.log("lenzPath "+pathToList.concat([targetEvIdx, "parameters", 1]));
             //console.log("targetEvObj code "+JSON.stringify(targetEvObj))
@@ -341,16 +273,13 @@ Promise.all(promiseArr)
         console.log(fileName + ":"+val);
     }
 }catch(e){
-    console.log(" error in "+fileName)
     console.log(e);
     console.log("path : ", innerPath)
-    console.log("val : ", val)
 }
 
     }
     try{
         for(let j in MsgWhObj){
-            //console.log(j);
             let path = R.compose(R.drop(1),R.split("/"))(j)
             let fileName = R.take(1, path);
             let innerPath = R.compose(R.map((item)=>!isNaN(parseInt(item)) ? parseInt(item) : item),R.drop(1))(path)
@@ -363,38 +292,45 @@ Promise.all(promiseArr)
             })(targetList);
 
             let targetEvObj   = R.path(pathToList.concat([targetEvIdx]), target[fileName]);
-
             let strArr = [];
             for(let i = targetEvIdx+1 ; i < targetList.length ;i++){
                 //console.log(pathToList.concat([i]))
                 let obj = R.path(pathToList.concat([i]), target[fileName]);
-                //if(obj.indent > 0) console.log(JSON.stringify(obj))
-                if(!!obj && (obj.code == 126 || obj.code == 101 || obj.code == 401)){
+                //console.log(JSON.stringify(obj))
+                if(!!obj && (obj.code == 101 || obj.code == 401)){
                     if(obj.code == 401){
                         strArr.push(obj.parameters[0])
                     }
                 }
-                if(!obj || (obj.code != 126 && obj.code != 101 && obj.code != 401)){
+                if(!obj || (obj.code != 101 && obj.code != 401)){
                     break;
                 }
             }
-            //console.log("Msg width strlen: "+strArr.length+":"+strArr)
+            console.log("Msg width strlen: "+strArr.length+":"+strArr)
             if(strArr.length > 0){
                 let maxLenStr = R.head(R.sort((a,b)=>{
-                    let aByLen = getStrByte(a);
-                    let bByLen = getStrByte(b);
+                    let aByLen = (function(s,b,i,c){
+                        for(b=i=0;c=s.charCodeAt(i++);b+=c>>11?3:c>>7?2:1);
+                        return b
+                    })(a);
+                    let bByLen = (function(s,b,i,c){
+                        for(b=i=0;c=s.charCodeAt(i++);b+=c>>11?3:c>>7?2:1);
+                        return b
+                    })(b);
                     return bByLen > aByLen;
                 })(strArr));
-
-                let bLen = getStrByte(R.compose(R.replace(/\\i\[\d+?\]/g,""),R.replace(/\\v\[\d+?\]/g,""),R.replace(/\c\[\d+?\]/g,""), R.replace(/\\\./g, ""))(maxLenStr));
-                target[fileName] = R.set(R.lensPath(pathToList.concat([targetEvIdx, "parameters", 0])), "MessageWidth "+bLen*(process.argv[3] == "eng" ? 15:14), target[fileName]);
+                let bLen = (function(s,b,i,c){
+                    for(b=i=0;c=s.charCodeAt(i++);b+=c>>11?3:c>>7?2:1);
+                    return b
+                })(maxLenStr);
+                target[fileName] = R.set(R.lensPath(pathToList.concat([targetEvIdx, "parameters", 0])), "MessageWidth "+bLen*20, target[fileName]);
             }
 
         }
     }catch(e){
         console.log("msg width error : "+e)
     }
-    console.log(JSON.stringify(specialContainer, null, 2));
+    //console.log(JSON.stringify(target, null, 2));
     //console.log("promise result, finished" );
 
     for (let filename in target){

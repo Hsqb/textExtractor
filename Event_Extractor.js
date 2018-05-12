@@ -37,6 +37,7 @@ const getJsonInDataDir = (path)=>{
 	}, filesArr)
 	return jsons;
 }
+const selection = [];
 /*
 R.is(Object, {}); //=> true
 R.is(Number, 1); //=> true
@@ -54,12 +55,12 @@ const walker = (path, node)=>{
 				//elseJsonRoot[path] = node;
 				return 0;
 		}else if(R.is(Object, node)){
-				for(let i in node){
+			for(let i in node){
 					promiseArr.push(new Promise((resolve, reject) => {
-            if(R.propEq("code", 117, node) && R.contains("CommonEvents", path)){
-   					 let commonEvent = R.find(R.compose(R.propEq("id", node.parameters[0]), R.defaultTo({})), commonEvents);
-   					 let eventName = commonEvent.name;
-     					if(R.test(/ﾒｯｾｰｼﾞｳｨﾝﾄﾞｳ:消去|ﾒｯｾｰｼﾞｳｨﾝﾄﾞｳ:\+W消去/,eventName)){
+                        if(R.propEq("code", 117, node) && R.contains("CommonEvents", path)){
+           					let commonEvent = R.find(R.compose(R.propEq("id", node.parameters[0]), R.defaultTo({})), commonEvents);
+           					let eventName = commonEvent.name;
+         					if(R.test(/ﾒｯｾｰｼﾞｳｨﾝﾄﾞｳ:消去|ﾒｯｾｰｼﾞｳｨﾝﾄﾞｳ:\+W消去/,eventName)){
      //						console.log("")
      						//pageObj.textArr.push("");
      					}else if(R.test(/ﾒｯｾｰｼﾞｳｨﾝﾄﾞ/,eventName)){
@@ -67,7 +68,7 @@ const walker = (path, node)=>{
      						//console.log(R.split(":",commonEvent.name)[1]);
      						//pageObj.textArr.push("");
 
-                elseJsonRoot[path] = R.split(":",commonEvent.name)[1];
+                            elseJsonRoot[path] = R.split(":",commonEvent.name)[1];
      					}
 
 
@@ -75,9 +76,9 @@ const walker = (path, node)=>{
               walker(path+"/"+i,node[i] )
             }
 
-						resolve();
-					}));
-				}
+					resolve();
+				}));
+			}
 		}else if(R.is(Array, node)){
 				for(let i in node){
 					promiseArr.push(new Promise((resolve, reject) => {
@@ -86,9 +87,9 @@ const walker = (path, node)=>{
 					}));
 				}
 		}else{
-        if(R.test(tester, node)) elseJsonRoot[path] = node;
+            if(R.test(tester, node)) elseJsonRoot[path] = node;
 
-				return 0
+			return 0
 		}
 
 }
@@ -150,6 +151,13 @@ const getMapEvents= (map, commonEvents) =>{
 					pageObj.allText += eventLine.parameters[0];
 					pageObj.textArr.push(eventLine.parameters[0]);
 				}
+                if(eventLine.code === 102){
+                    //selection
+                    eventLine.parameters[0].forEach((str)=>{
+                        selection.push(str);
+                    });
+
+                }
 			}, list)
 			if(isPage401) {
 				//console.log("- "+event.name + " page "+idx +" END   ----");
@@ -196,6 +204,13 @@ if(isMapMode){
 		console.log("");
 		//make Excel;
 	}, mapEventsKeys)
+    console.log("----------------")
+    console.log("----------------")
+    console.log("----------------")
+    console.log("----------------")
+    selection.map((str)=>{
+        console.log(str);
+    })
 }else{ // elseMode
 	R.map((mapKey)=>{
 		let id = [mapKey]
